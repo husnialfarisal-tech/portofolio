@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
 
-const MAINTENANCE_MODE = true // ganti false kalau selesai
+const MAINTENANCE_MODE = false // ganti false kalau selesai
 
 export function middleware(request: NextRequest) {
   if (MAINTENANCE_MODE && !request.nextUrl.pathname.startsWith('/maintenance')) {
