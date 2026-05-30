@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image'
 
 const funFacts = [
-  { icon: Coffee, text: '☕ 3+ cups of coffee per day' },
-  { icon: Heart, text: '❤️ Passionate about clean code' },
-  { icon: Zap, text: '⚡ Fast learner & problem solver' },
-  { icon: Code, text: '💻 50+ personal projects completed' },
+  { icon: Coffee, text: ' 3+ cups of coffee per day' },
+  { icon: Heart, text: ' Passionate about clean code' },
+  { icon: Zap, text: ' Fast learner & problem solver' },
+  { icon: Code, text: ' 50+ personal projects completed' },
 ];
 
 export default function About() {

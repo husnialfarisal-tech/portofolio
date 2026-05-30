@@ -2,20 +2,24 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, Code2, Server, Database } from 'lucide-react';
+import { Github, ExternalLink, Code2, Server, Database, X, ZoomIn } from 'lucide-react';
 import { projects, type ProjectCategory } from '@/data/projects';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
-const categories: ProjectCategory[] = ['All', 'React', 'Next.js', 'API'];
+const categories: ProjectCategory[] = ['All', 'React', 'Next.js', 'API', 'PHP'];
 
-const categoryIcons = {
+const categoryIcons: Record<string, any> = {
   React: Code2,
   'Next.js': Code2,
   API: Server,
+  PHP: Database,
 };
 
 export default function Projects() {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory>('All');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedTitle, setSelectedTitle] = useState<string>('');
 
   const filteredProjects = activeCategory === 'All'
     ? projects
@@ -103,27 +107,50 @@ export default function Projects() {
                   className="group"
                 >
                   <div className="relative h-full rounded-2xl border border-border bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/50 transition-all duration-300">
-                    {/* Project image with overlay */}
-                    <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-                      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-50" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <CategoryIcon className="h-16 w-16 text-primary/30" />
-                      </div>
-                      
+                    
+                    {/* Project image */}
+                    <div
+                      className="relative h-48 overflow-hidden cursor-zoom-in"
+                      onClick={() => {
+                        setSelectedImage(project.image);
+                        setSelectedTitle(project.title);
+                      }}
+                    >
+                      {project.image ? (
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                          <CategoryIcon className="h-16 w-16 text-primary/30" />
+                        </div>
+                      )}
+
                       {/* Category badge */}
-                      <div className="absolute top-4 left-4">
+                      <div className="absolute top-4 left-4 z-10">
                         <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-semibold text-primary border border-primary/30">
                           {project.category}
                         </span>
                       </div>
 
-                      {/* Hover overlay */}
+                      {/* Zoom hint */}
+                      <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-primary/30">
+                          <ZoomIn className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+
+                      {/* Hover overlay with links */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 bg-background/90 flex items-center justify-center gap-4 transition-opacity"
+                        className="absolute inset-0 bg-background/90 flex items-center justify-center gap-4"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {project.liveUrl && (
+                        {project.liveUrl && project.liveUrl !== '#' && (
                           <motion.a
                             href={project.liveUrl}
                             target="_blank"
@@ -147,6 +174,18 @@ export default function Projects() {
                             <Github className="h-5 w-5" />
                           </motion.a>
                         )}
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImage(project.image);
+                            setSelectedTitle(project.title);
+                          }}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-12 h-12 rounded-full bg-background border border-primary/30 text-primary flex items-center justify-center hover:bg-primary hover:text-black transition-all"
+                        >
+                          <ZoomIn className="h-5 w-5" />
+                        </motion.button>
                       </motion.div>
                     </div>
 
@@ -158,7 +197,7 @@ export default function Projects() {
                       <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                         {project.description}
                       </p>
-                      
+
                       {/* Tech stack badges */}
                       <div className="flex flex-wrap gap-2">
                         {project.techStack.map((tech) => (
@@ -189,6 +228,54 @@ export default function Projects() {
           </motion.div>
         )}
       </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 bg-black/95 flex flex-col items-center justify-center p-4 cursor-zoom-out"
+            style={{ zIndex: 9999 }}
+          >
+            {/* Header */}
+            <div className="w-full max-w-5xl flex items-center justify-between mb-4">
+              <span className="text-white/70 font-semibold text-lg">{selectedTitle}</span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedImage(null)}
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+              >
+                <X className="h-5 w-5" />
+              </motion.button>
+            </div>
+
+            {/* Image */}
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-5xl rounded-2xl overflow-hidden border border-white/10"
+              style={{ aspectRatio: '16/9' }}
+            >
+              <Image
+                src={selectedImage}
+                alt={selectedTitle}
+                fill
+                className="object-contain"
+              />
+            </motion.div>
+
+            {/* Close hint */}
+            <p className="text-white/30 text-sm mt-4">Klik di luar untuk menutup</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
